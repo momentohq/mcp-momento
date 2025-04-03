@@ -13,15 +13,25 @@ const mcpServer = new McpServer({
   },
 });
 
+// Helper function for reading environment variables
+function readEnvironmentVariable(name: string, defaultValue: string): string {
+  const value = process.env[name];
+  if (!value) {
+    console.warn(`Environment variable ${name} is not set. Using default value ${defaultValue}.`);
+    return defaultValue;
+  }
+  return value;
+}
+
 // Create Momento client
-const defaultTtlSeconds = Number(process.env.DEFAULT_TTL_SECONDS ?? 60);
+const defaultTtlSeconds = Number(readEnvironmentVariable("DEFAULT_TTL_SECONDS", "60"));
 const momento = new CacheClient({
   credentialProvider: CredentialProvider.fromEnvVar("MOMENTO_API_KEY"),
   defaultTtlSeconds,
 });
 
 // Initialize the cache if it does not already exist
-const cacheName = process.env.MOMENTO_CACHE_NAME ?? "mcp-momento";
+const cacheName = readEnvironmentVariable("MOMENTO_CACHE_NAME", "mcp-momento");
 
 // Schema definitions
 const GetArgsSchema = z.object({
