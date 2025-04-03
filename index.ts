@@ -6,7 +6,7 @@ import { z } from "zod";
 // Create server instance
 const mcpServer = new McpServer({
   name: "momento",
-  version: "1.0.0",
+  version: "0.1.0",
   capabilities: {
     resources: {},
     tools: {},
