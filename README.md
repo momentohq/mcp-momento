@@ -1,11 +1,22 @@
-# Basic MCP Server
+# Momento MCP Server
 
-A simple Model Context Protocol (MCP) server implementation for Momento Cache in Node.js.
+A simple Model Context Protocol (MCP) server implementation for Momento Cache.
 
 ## Tools
 
-- `get` -- Get the cache value stored for the given key. Returns a `Hit` if the key was found, `Miss` if the key was not found, or `Error` if the request failed.
-- `set` -- Sets the value in cache with a given Time To Live (TTL) seconds. If a value for this key is already present, it will be replaced by the new value regardless of the previous value's data type. Returns a `Success` or `Error` response.
+- `get`
+  - Get the cache value stored for the given key. 
+  - Inputs:
+    - `key` string -- the key to look up in the cache.
+  - Returns: 
+    - `Hit` with the found value if the key was found.
+    - `Miss` if the key was not found.
+    - `Error` if the request failed.
+- `set`
+  - Sets the value in cache with a given Time To Live (TTL) seconds. If a value for this key is already present, it will be replaced by the new value regardless of the previous value's data type. 
+  - Returns: 
+    - `Success` if the key was successfully written to the cache.
+    - `Error` if the request failed.
 
 ## Setup
 
