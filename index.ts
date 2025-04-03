@@ -50,15 +50,19 @@ mcpServer.tool("get", "get a key-value pair from the cache", GetArgsSchema.shape
   switch (result.type) {
     case CacheGetResponse.Hit:
       return {
-        content: [{ type: "text", text: `Cache hit: ${result.value()}` }],
+        content: [{ type: "text", text: `Status: HIT\nValue: ${result.value()}` }],
       };
     case CacheGetResponse.Miss:
       return {
-        content: [{ type: "text", text: "Cache miss" }],
+        content: [{ type: "text", text: "Status: MISS" }],
+      };
+    case CacheGetResponse.Error:
+      return {
+        content: [{ type: "text", text: `Status: ERROR:\nDetails: ${result.message()}` }],
       };
     default:
       return {
-        content: [{ type: "text", text: `ERROR: Unexpected cache get response: ${result.toString()}` }],
+        content: [{ type: "text", text: `Status: UNKNOWN RESPONSE:\nDetails: ${result}` }],
       };
   }
 });
@@ -68,11 +72,15 @@ mcpServer.tool("set", "set a key-value pair in the cache", SetArgsSchema.shape, 
   switch (result.type) {
     case CacheSetResponse.Success:
       return {
-        content: [{ type: "text", text: "Cache set" }],
+        content: [{ type: "text", text: "Status: SUCCESS" }],
+      };
+    case CacheSetResponse.Error:
+      return {
+        content: [{ type: "text", text: `Status: ERROR:\nDetails: ${result.message()}` }],
       };
     default:
       return {
-        content: [{ type: "text", text: `ERROR: Unexpected cache set response: ${result.toString()}` }],
+        content: [{ type: "text", text: `Status: UNKNOWN RESPONSE:\nDetails: ${result}` }],
       };
   }
 });
