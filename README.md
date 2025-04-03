@@ -4,8 +4,8 @@ A simple Model Context Protocol (MCP) server implementation for Momento Cache in
 
 ## Tools
 
-- `get`
-- `set`
+- `get` -- Get the cache value stored for the given key. Returns a `Hit` if the key was found, `Miss` if the key was not found, or `Error` if the request failed.
+- `set` -- Sets the value in cache with a given Time To Live (TTL) seconds. If a value for this key is already present, it will be replaced by the new value regardless of the previous value's data type. Returns a `Success` or `Error` response.
 
 ## Setup
 
@@ -21,7 +21,7 @@ npm install
 npm run build
 ```
 
-4. Set optional environment variables to configure the cache name and time-to-live (TTL) for items in the cache.
+4. Set optional environment variables to configure the cache name and Time To Live (TTL) for items in the cache.
 ```bash
 export MOMENTO_CACHE_NAME="your-cache-name"
 export DEFAULT_TTL_SECONDS=60
