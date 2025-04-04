@@ -2,7 +2,9 @@ import {
   CacheClient,
   CacheGetResponse,
   CacheSetResponse,
+  Configurations,
   CredentialProvider,
+  NoopMomentoLoggerFactory,
 } from "@gomomento/sdk";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -36,6 +38,7 @@ const defaultTtlSeconds = Number(
 );
 const momento = new CacheClient({
   credentialProvider: CredentialProvider.fromEnvVar("MOMENTO_API_KEY"),
+  configuration: Configurations.Laptop.v1(new NoopMomentoLoggerFactory()),
   defaultTtlSeconds,
 });
 
