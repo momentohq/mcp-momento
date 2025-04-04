@@ -2,6 +2,8 @@
 
 A simple Model Context Protocol (MCP) server implementation for Momento Cache.
 
+Available on npmjs as [`@gomomento/mcp-momento`](https://www.npmjs.com/package/@gomomento/mcp-momento)
+
 ## Tools
 
 - `get`
@@ -18,27 +20,29 @@ A simple Model Context Protocol (MCP) server implementation for Momento Cache.
     - `Success` if the key was successfully written to the cache.
     - `Error` if the request failed.
 
-## Setup
+## Quickstart
 
 1. Get a Momento API key from the [Momento Console](https://console.gomomento.com/).
 
-2. Install dependencies:
+2. Set environment variables to configure the cache name and Time To Live (TTL) for items in the cache.
+    ```bash
+    # required
+    export MOMENTO_API_KEY="your-api-key"
+
+    # optional
+    export MOMENTO_CACHE_NAME="your-cache-name"
+    export DEFAULT_TTL_SECONDS=60
+    ```
+
+### Usage with MCP Inspector
+
 ```bash
-npm install
+npx -y @modelcontextprotocol/inspector npx @gomomento/mcp-momento@latest
 ```
 
-3. Build the server:
-```bash
-npm run build
-```
+### Usage with NPX on Claude Desktop
 
-4. Set optional environment variables to configure the cache name and Time To Live (TTL) for items in the cache.
-```bash
-export MOMENTO_CACHE_NAME="your-cache-name"
-export DEFAULT_TTL_SECONDS=60
-```
-
-## Usage with NPX
+Note: if you're using `nodenv`, replace the plain `npx` with the path to your npx binary (e.g. `/Users/username/.nodenv/shims/npx`).
 
 ```json
 {
@@ -50,16 +54,29 @@ export DEFAULT_TTL_SECONDS=60
         "@gomomento/mcp-momento"
       ],
       "env": {
-        "MOMENTO_API_KEY": "your-api-key"
+        "MOMENTO_API_KEY": "your-api-key",
+        "MOMENTO_CACHE_NAME": "your-cache-name",
+        "DEFAULT_TTL_SECONDS": 60
       }
     }
   }
 }
 ```
 
-## Usage with MCP Inspector
+## Setup for local development
 
-```bash
-export MOMENTO_API_KEY="your-api-key"
-npx @modelcontextprotocol/inspector node dist/index.js
-```
+1. Install dependencies:
+    ```bash
+    npm install
+    ```
+
+2. Build the server:
+    ```bash
+    npm run build
+    ```
+
+3. Run with MCP Inspector
+    ```bash
+    export MOMENTO_API_KEY="your-api-key"
+    npx @modelcontextprotocol/inspector node dist/index.js
+    ```
