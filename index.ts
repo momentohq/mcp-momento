@@ -1,4 +1,9 @@
-import { CacheClient, CacheGetResponse, CacheSetResponse, CredentialProvider } from "@gomomento/sdk";
+import {
+  CacheClient,
+  CacheGetResponse,
+  CacheSetResponse,
+  CredentialProvider,
+} from "@gomomento/sdk";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
@@ -17,14 +22,18 @@ const mcpServer = new McpServer({
 function readEnvironmentVariable(name: string, defaultValue: string): string {
   const value = process.env[name];
   if (!value) {
-    console.warn(`Environment variable ${name} is not set. Using default value ${defaultValue}.`);
+    console.warn(
+      `Environment variable ${name} is not set. Using default value ${defaultValue}.`
+    );
     return defaultValue;
   }
   return value;
 }
 
 // Create Momento client
-const defaultTtlSeconds = Number(readEnvironmentVariable("DEFAULT_TTL_SECONDS", "60"));
+const defaultTtlSeconds = Number(
+  readEnvironmentVariable("DEFAULT_TTL_SECONDS", "60")
+);
 const momento = new CacheClient({
   credentialProvider: CredentialProvider.fromEnvVar("MOMENTO_API_KEY"),
   defaultTtlSeconds,
@@ -45,45 +54,77 @@ const SetArgsSchema = z.object({
 });
 
 // Tool handlers seem to register the tools for 'tools/list' endpoint too
-mcpServer.tool("get", "get a key-value pair from the cache", GetArgsSchema.shape, async ({key}) => {
-  const result = await momento.get(cacheName, key);
-  switch (result.type) {
-    case CacheGetResponse.Hit:
-      return {
-        content: [{ type: "text", text: `Status: HIT\nValue: ${result.value()}` }],
-      };
-    case CacheGetResponse.Miss:
-      return {
-        content: [{ type: "text", text: "Status: MISS" }],
-      };
-    case CacheGetResponse.Error:
-      return {
-        content: [{ type: "text", text: `Status: ERROR:\nDetails: ${result.message()}` }],
-      };
-    default:
-      return {
-        content: [{ type: "text", text: `Status: UNKNOWN RESPONSE:\nDetails: ${result}` }],
-      };
+mcpServer.tool(
+  "get",
+  "get a key-value pair from the cache",
+  GetArgsSchema.shape,
+  async ({ key }) => {
+    const result = await momento.get(cacheName, key);
+    switch (result.type) {
+      case CacheGetResponse.Hit:
+        return {
+          content: [
+            { type: "text", text: `Status: HIT\nValue: ${result.value()}` },
+          ],
+        };
+      case CacheGetResponse.Miss:
+        return {
+          content: [{ type: "text", text: "Status: MISS" }],
+        };
+      case CacheGetResponse.Error:
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Status: ERROR:\nDetails: ${result.message()}`,
+            },
+          ],
+        };
+      default:
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Status: UNKNOWN RESPONSE:\nDetails: ${result}`,
+            },
+          ],
+        };
+    }
   }
-});
+);
 
-mcpServer.tool("set", "set a key-value pair in the cache", SetArgsSchema.shape, async ({key, value, ttl}) => {
-  const result = await momento.set(cacheName, key, value, { ttl });
-  switch (result.type) {
-    case CacheSetResponse.Success:
-      return {
-        content: [{ type: "text", text: "Status: SUCCESS" }],
-      };
-    case CacheSetResponse.Error:
-      return {
-        content: [{ type: "text", text: `Status: ERROR:\nDetails: ${result.message()}` }],
-      };
-    default:
-      return {
-        content: [{ type: "text", text: `Status: UNKNOWN RESPONSE:\nDetails: ${result}` }],
-      };
+mcpServer.tool(
+  "set",
+  "set a key-value pair in the cache",
+  SetArgsSchema.shape,
+  async ({ key, value, ttl }) => {
+    const result = await momento.set(cacheName, key, value, { ttl });
+    switch (result.type) {
+      case CacheSetResponse.Success:
+        return {
+          content: [{ type: "text", text: "Status: SUCCESS" }],
+        };
+      case CacheSetResponse.Error:
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Status: ERROR:\nDetails: ${result.message()}`,
+            },
+          ],
+        };
+      default:
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Status: UNKNOWN RESPONSE:\nDetails: ${result}`,
+            },
+          ],
+        };
+    }
   }
-});
+);
 
 async function main() {
   // Initialize the cache if it does not already exist
