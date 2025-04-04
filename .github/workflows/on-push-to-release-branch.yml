@@ -55,6 +55,6 @@ jobs:
           echo "Publishing package with version $VERSION"
           mv package.json package.json.ORIG
           cat package.json.ORIG|jq ". += {\"version\": \"$VERSION\"}" > package.json
-          npm publish --access public
+          npm publish --access public --dry-run
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
