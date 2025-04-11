@@ -47,27 +47,40 @@ const momento = new CacheClient({
 });
 
 // Initialize the cache if it does not already exist
-const defaultCacheName = readEnvironmentVariable("MOMENTO_CACHE_NAME", "mcp-momento");
+const defaultCacheName = readEnvironmentVariable(
+  "MOMENTO_CACHE_NAME",
+  "mcp-momento"
+);
 
 // Schema definitions
 const GetArgsSchema = z.object({
   key: z.string().describe("The key to get from the cache"),
-  cacheName: z.string().describe("The name of the cache to get the value from. Uses the default cache name if not provided.").optional()
+  cacheName: z
+    .string()
+    .describe(
+      "The name of the cache to get the value from. Uses the default cache name if not provided."
+    )
+    .optional(),
 });
 
 const SetArgsSchema = z.object({
   key: z.string().describe("The key to set in the cache"),
   value: z.string().describe("The value to set in the cache"),
   ttl: z.number().describe("The TTL for the key in seconds").optional(),
-  cacheName: z.string().describe("The name of the cache to set the value in. Uses the default cache name if not provided.").optional()
+  cacheName: z
+    .string()
+    .describe(
+      "The name of the cache to set the value in. Uses the default cache name if not provided."
+    )
+    .optional(),
 });
 
 const CreateCacheArgsSchema = z.object({
-  name: z.string().describe("The name of the cache to create")
+  name: z.string().describe("The name of the cache to create"),
 });
 
 const DeleteCacheArgsSchema = z.object({
-  name: z.string().describe("The name of the cache to delete")
+  name: z.string().describe("The name of the cache to delete"),
 });
 
 // Tool handlers seem to register the tools for 'tools/list' endpoint too
@@ -260,7 +273,7 @@ mcpServer.tool(
         };
     }
   }
-)
+);
 
 async function main() {
   // Run the server
