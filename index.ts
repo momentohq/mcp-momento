@@ -157,7 +157,10 @@ mcpServer.tool(
           content: [
             {
               type: "text",
-              text: `Status: SUCCESS\nDetails: ${result.getCaches().map(cache => cache.getName())}`,
+              text: `Status: SUCCESS\nCaches: ${result
+                .getCaches()
+                .map((cache) => cache.getName())
+                .join("\n")}`,
             },
           ],
         };
