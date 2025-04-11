@@ -3,6 +3,9 @@ import {
   CacheClient,
   CacheGetResponse,
   CacheSetResponse,
+  ListCachesResponse,
+  CreateCacheResponse,
+  DeleteCacheResponse,
   Configurations,
   CredentialProvider,
   NoopMomentoLoggerFactory,
@@ -44,17 +47,27 @@ const momento = new CacheClient({
 });
 
 // Initialize the cache if it does not already exist
-const cacheName = readEnvironmentVariable("MOMENTO_CACHE_NAME", "mcp-momento");
+const defaultCacheName = readEnvironmentVariable("MOMENTO_CACHE_NAME", "mcp-momento");
 
 // Schema definitions
 const GetArgsSchema = z.object({
   key: z.string().describe("The key to get from the cache"),
+  cacheName: z.string().describe("The name of the cache to get the value from. Uses the default cache name if not provided.").optional()
 });
 
 const SetArgsSchema = z.object({
   key: z.string().describe("The key to set in the cache"),
   value: z.string().describe("The value to set in the cache"),
   ttl: z.number().describe("The TTL for the key in seconds").optional(),
+  cacheName: z.string().describe("The name of the cache to set the value in. Uses the default cache name if not provided.").optional()
+});
+
+const CreateCacheArgsSchema = z.object({
+  name: z.string().describe("The name of the cache to create")
+});
+
+const DeleteCacheArgsSchema = z.object({
+  name: z.string().describe("The name of the cache to delete")
 });
 
 // Tool handlers seem to register the tools for 'tools/list' endpoint too
@@ -62,7 +75,8 @@ mcpServer.tool(
   "get",
   "get a key-value pair from the cache",
   GetArgsSchema.shape,
-  async ({ key }) => {
+  async ({ key, cacheName }) => {
+    cacheName = cacheName ?? defaultCacheName;
     const result = await momento.get(cacheName, key);
     switch (result.type) {
       case CacheGetResponse.Hit:
@@ -101,7 +115,8 @@ mcpServer.tool(
   "set",
   "set a key-value pair in the cache",
   SetArgsSchema.shape,
-  async ({ key, value, ttl }) => {
+  async ({ key, value, ttl, cacheName }) => {
+    cacheName = cacheName ?? defaultCacheName;
     const result = await momento.set(cacheName, key, value, { ttl });
     switch (result.type) {
       case CacheSetResponse.Success:
@@ -130,10 +145,121 @@ mcpServer.tool(
   }
 );
 
-async function main() {
-  // Initialize the cache if it does not already exist
-  await momento.createCache(cacheName);
+mcpServer.tool(
+  "list-caches",
+  "Lists all cache names in your Momento account",
+  {},
+  async () => {
+    const result = await momento.listCaches();
+    switch (result.type) {
+      case ListCachesResponse.Success:
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Status: SUCCESS\nDetails: ${result.getCaches().map(cache => cache.getName())}`,
+            },
+          ],
+        };
+      case ListCachesResponse.Error:
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Status: ERROR:\nDetails: ${result.message()}`,
+            },
+          ],
+        };
+      default:
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Status: UNKNOWN RESPONSE:\nDetails: ${result}`,
+            },
+          ],
+        };
+    }
+  }
+);
 
+mcpServer.tool(
+  "create-cache",
+  "Creates a new cache",
+  CreateCacheArgsSchema.shape,
+  async ({ name }) => {
+    const result = await momento.createCache(name);
+    switch (result.type) {
+      case CreateCacheResponse.Success:
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Status: SUCCESS`,
+            },
+          ],
+        };
+      case CreateCacheResponse.Error:
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Status: ERROR:\nDetails: ${result.message()}`,
+            },
+          ],
+        };
+      default:
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Status: UNKNOWN RESPONSE:\nDetails: ${result}`,
+            },
+          ],
+        };
+    }
+  }
+);
+
+mcpServer.tool(
+  "delete-cache",
+  "Deletes a cache and all contained values from your Momento account",
+  DeleteCacheArgsSchema.shape,
+  async ({ name }) => {
+    const result = await momento.deleteCache(name);
+    switch (result.type) {
+      case DeleteCacheResponse.Success:
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Status: SUCCESS`,
+            },
+          ],
+        };
+      case DeleteCacheResponse.Error:
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Status: ERROR:\nDetails: ${result.message()}`,
+            },
+          ],
+        };
+      default:
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Status: UNKNOWN RESPONSE:\nDetails: ${result}`,
+            },
+          ],
+        };
+    }
+  }
+)
+
+async function main() {
   // Run the server
   const transport = new StdioServerTransport();
   await mcpServer.connect(transport);
