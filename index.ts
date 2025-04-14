@@ -89,8 +89,8 @@ mcpServer.tool(
   "get a key-value pair from the cache",
   GetArgsSchema.shape,
   async ({ key, cacheName }) => {
-    cacheName = cacheName ?? defaultCacheName;
-    const result = await momento.get(cacheName, key);
+    const cache = cacheName ?? defaultCacheName;
+    const result = await momento.get(cache, key);
     switch (result.type) {
       case CacheGetResponse.Hit:
         return {
@@ -129,8 +129,8 @@ mcpServer.tool(
   "set a key-value pair in the cache",
   SetArgsSchema.shape,
   async ({ key, value, ttl, cacheName }) => {
-    cacheName = cacheName ?? defaultCacheName;
-    const result = await momento.set(cacheName, key, value, { ttl });
+    const cache = cacheName ?? defaultCacheName;
+    const result = await momento.set(cache, key, value, { ttl });
     switch (result.type) {
       case CacheSetResponse.Success:
         return {
@@ -221,6 +221,15 @@ mcpServer.tool(
             {
               type: "text",
               text: `Status: ERROR:\nDetails: ${result.message()}`,
+            },
+          ],
+        };
+      case CreateCacheResponse.AlreadyExists:
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Status: CACHE ALREADY EXISTS`,
             },
           ],
         };
