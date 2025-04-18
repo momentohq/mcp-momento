@@ -318,7 +318,7 @@ mcpServer.tool(
   "publish",
   "publish a value to a topic",
   PublishTopicArgsSchema.shape,
-  async({ cacheName, topicName, value }) => {
+  async ({ cacheName, topicName, value }) => {
     const cache = cacheName ?? defaultCacheName;
     const topic = topicName ?? defaultTopicName;
     const result = await momentoTopic.publish(cache, topic, value);
@@ -326,28 +326,28 @@ mcpServer.tool(
       case TopicPublishResponse.Success:
         return {
           content: [{ type: "text", text: "Status: SUCCESS" }],
-        }
+        };
       case TopicPublishResponse.Error:
         return {
           content: [
             {
               type: "text",
               text: `Status: ERROR:\nDetails: ${result.message()}`,
-            }
-          ]
-        }
+            },
+          ],
+        };
       default:
-          return {
-            content: [
-              {
-                type: "text",
-                text: `Status: UNKNOWN RESPONSE:\nDetails: ${result}`,
-              },
-            ],
-          };
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Status: UNKNOWN RESPONSE:\nDetails: ${result}`,
+            },
+          ],
+        };
     }
   }
-)
+);
 
 async function main() {
   // Run the server
