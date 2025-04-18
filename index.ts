@@ -9,6 +9,10 @@ import {
   Configurations,
   CredentialProvider,
   NoopMomentoLoggerFactory,
+  TopicClient,
+  TopicClientConfiguration,
+  TopicConfigurations,
+  TopicPublishResponse,
 } from "@gomomento/sdk";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
@@ -46,10 +50,20 @@ const momento = new CacheClient({
   defaultTtlSeconds,
 });
 
+const momentoTopic = new TopicClient({
+  credentialProvider: CredentialProvider.fromEnvVar("MOMENTO_API_KEY"),
+  configuration: TopicConfigurations.Default.latest(),
+});
+
 // Initialize the cache if it does not already exist
 const defaultCacheName = readEnvironmentVariable(
   "MOMENTO_CACHE_NAME",
   "mcp-momento"
+);
+
+const defaultTopicName = readEnvironmentVariable(
+  "MOMENTO_TOPIC_NAME",
+  "mcp-momento-topic"
 );
 
 // Schema definitions
@@ -81,6 +95,22 @@ const CreateCacheArgsSchema = z.object({
 
 const DeleteCacheArgsSchema = z.object({
   name: z.string().describe("The name of the cache to delete"),
+});
+
+const PublishTopicArgsSchema = z.object({
+  cacheName: z
+    .string()
+    .describe(
+      "The name of the cache to set the value in. Uses the default cache name if not provided."
+    )
+    .optional(),
+  topicName: z
+    .string()
+    .describe(
+      "The name of the topic to publish the value to. Uses the default topic name if not provided."
+    )
+    .optional(),
+  value: z.string().describe("The value to publish"),
 });
 
 // Tool handlers seem to register the tools for 'tools/list' endpoint too
@@ -263,6 +293,41 @@ mcpServer.tool(
           ],
         };
       case DeleteCacheResponse.Error:
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Status: ERROR:\nDetails: ${result.message()}`,
+            },
+          ],
+        };
+      default:
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Status: UNKNOWN RESPONSE:\nDetails: ${result}`,
+            },
+          ],
+        };
+    }
+  }
+);
+
+mcpServer.tool(
+  "publish",
+  "publish a value to a topic",
+  PublishTopicArgsSchema.shape,
+  async ({ cacheName, topicName, value }) => {
+    const cache = cacheName ?? defaultCacheName;
+    const topic = topicName ?? defaultTopicName;
+    const result = await momentoTopic.publish(cache, topic, value);
+    switch (result.type) {
+      case TopicPublishResponse.Success:
+        return {
+          content: [{ type: "text", text: "Status: SUCCESS" }],
+        };
+      case TopicPublishResponse.Error:
         return {
           content: [
             {
