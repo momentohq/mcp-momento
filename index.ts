@@ -110,7 +110,7 @@ const PublishTopicArgsSchema = z.object({
       "The name of the topic to publish the value to. Uses the default topic name if not provided."
     )
     .optional(),
-  value: z.string().describe("The value to set in the cache"),
+  value: z.string().describe("The value to publish"),
 });
 
 // Tool handlers seem to register the tools for 'tools/list' endpoint too
