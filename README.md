@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/momentohq-mcp-momento-badge.png)](https://mseep.ai/app/momentohq-mcp-momento)
+
 # Momento MCP Server
 
 A simple Model Context Protocol (MCP) server implementation for Momento Cache.
