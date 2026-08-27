@@ -19,14 +19,18 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 
 // Create server instance
-const mcpServer = new McpServer({
-  name: "momento",
-  version: "0.1.0",
-  capabilities: {
-    resources: {},
-    tools: {},
+const mcpServer = new McpServer(
+  {
+    name: "momento",
+    version: "0.1.0",
   },
-});
+  {
+    capabilities: {
+      resources: {},
+      tools: {},
+    },
+  }
+);
 
 // Helper function for reading environment variables
 function readEnvironmentVariable(name: string, defaultValue: string): string {
